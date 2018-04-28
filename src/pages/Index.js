@@ -107,7 +107,10 @@ class Index extends React.Component {
                         now = item.dateTime;
                     }
                 } else {
-                    item.dt = formatTime(new Date(item.dateTime), 'MM-dd hh:mm');
+                    if (Math.abs((now - item.dateTime) / (1000 * 60)) > 5) {
+                        item.dt = formatTime(new Date(item.dateTime), 'MM-dd hh:mm');
+                        now = item.dateTime;
+                    }
                 }
                 item.hdt = true;
             }
@@ -123,7 +126,6 @@ class Index extends React.Component {
                     }
                 }
             }
-            console.log(lastFormat);
             for (let item of notFormatList) {
                 if (this.isToday(item.dateTime)) {
                     if (Math.abs((now - item.dateTime) / (1000 * 60)) > 5) {
@@ -131,7 +133,10 @@ class Index extends React.Component {
                         now = item.dateTime;
                     }
                 } else {
-                    item.dt = formatTime(new Date(item.dateTime), 'MM-dd hh:mm');
+                    if (Math.abs((now - item.dateTime) / (1000 * 60)) > 5) {
+                        item.dt = formatTime(new Date(item.dateTime), 'MM-dd hh:mm');
+                        now = item.dateTime;
+                    }
                 }
                 item.hdt = true;
             }
