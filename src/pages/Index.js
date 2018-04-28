@@ -84,15 +84,15 @@ class Index extends React.Component {
         }
     }
 
-    updateTimeLine({persist}){
+    updateTimeLine({type='refresh'}){
         let now = new Date().getTime();
         let first = false;
-        if(!persist){//不保留原时间:用于刷新列表,保留用于单独新增数据
+        if(type==='refresh'){//不保留原时间:用于刷新列表,保留用于单独新增数据
             this.state.list.forEach(item=>{
                 delete item.hdt;
             })
         }
-        if(persist){
+        if(type==='append'){
             let notFormatList = [];
             let lastFormat = null;
             for(let item of this.state.list){
@@ -110,19 +110,41 @@ class Index extends React.Component {
                 }
                 item.hdt = true;
             }
-        }else{
+        }else if(type==='refresh'){
             for(let item of [...this.state.list].reverse()){
-                if(!item.hdt){
-                    if(this.isToday(item.dateTime)){
-                        if(((now-item.dateTime)/(1000*60))>5){
-                            item.dt = formatTime(new Date(item.dateTime),'hh:mm');
-                            now = item.dateTime;
-                        }
-                    }else{
-                        item.dt = formatTime(new Date(item.dateTime),'MM-dd');
+                if(this.isToday(item.dateTime)){
+                    if(Math.abs((now-item.dateTime)/(1000*60))>5){
+                        item.dt = formatTime(new Date(item.dateTime),'hh:mm');
+                        now = item.dateTime;
                     }
-                    item.hdt = true;
+                }else{
+                    item.dt = formatTime(new Date(item.dateTime),'MM-dd hh:mm');
                 }
+                item.hdt = true;
+            }
+        }else if(type==='insert'){
+            let notFormatList = [];
+            let lastFormat = null;
+            for(let item of this.state.list){
+                if(!item.hdt){
+                    notFormatList.push(item);
+                }else{
+                    if(lastFormat===null){
+                        lastFormat = item;
+                    }
+                }
+            }
+            console.log(lastFormat);
+            for(let item of notFormatList){
+                if(this.isToday(item.dateTime)){
+                    if(Math.abs((now-item.dateTime)/(1000*60))>5){
+                        item.dt = formatTime(new Date(item.dateTime),'hh:mm');
+                        now = item.dateTime;
+                    }
+                }else{
+                    item.dt = formatTime(new Date(item.dateTime),'MM-dd hh:mm');
+                }
+                item.hdt = true;
             }
         }
         this.setState({});
@@ -132,7 +154,7 @@ class Index extends React.Component {
 
         let $this = this;
         $this.updateTimeLine({});
-        setTimeout(function () {
+        let appendData = function(){
             $this.state.list.push({
                 id:4,
                 dateTime:1524890275623,
@@ -152,8 +174,29 @@ class Index extends React.Component {
                 text:'whs'
             });
             $this.setState({},function () {
-                $this.updateTimeLine({persist:true});
+                $this.updateTimeLine({type:'append'});
             });
+        };
+        let insertData = function(){
+            $this.state.list.unshift({
+                id:4,
+                dateTime:1521190275623,
+                isMe:true,
+                text:'whs'
+            });
+            $this.state.list.unshift({
+                id:5,
+                dateTime:1521090275623,
+                isMe:false,
+                text:'you name'
+            });
+            $this.setState({},function () {
+                $this.updateTimeLine({type:'insert'});
+            });
+        }
+        setTimeout(function () {
+            appendData();
+            // insertData();
             // setTimeout(function () {
             //     $this.updateTimeLine({persist:false});
             // },2000)
